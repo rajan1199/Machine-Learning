@@ -1,0 +1,172 @@
+---
+title: "Data Analytics Laboratory (CSPC-322)"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+# **Lab Assignment 4**                 
+
+# *Submitted by:*           
+<li>**Name:** Rajan Kataria</li>          
+<li>**Roll. No.** 18103076</li>               
+<li>**Branch/Sem:** CSE/6th</li>            
+<li>**Group:** G4</li>       
+
+## **Task: Know the significance of ANOVA test**                       
+
+## **Subtasks:**         
+Select a suitable dataset for following test of significance (Hypothesis testing), and interpret output parameters and their significance with respect to the selected data set and Hypothesis.                        
+
+**3.1** One way ANOVA t-test      
+**3.2** Two way ANOVA t-test      
+
+You need to perform above given task using two different methods.                   
+**1.** Use inbuilt function aov().                                    
+**2.** Design your own functions to perform the above stated task.         
+
+**Dataset Used:**              
+The dataset being used for this task is the third dataset link provided in the assignment itself.           
+The link to dataset is given as follows:             
+"https://raw.githubusercontent.com/guru99-edu/R-Programming/master/poisons.csv"    
+
+```{r} 
+# Path to dataset
+path<-"https://raw.githubusercontent.com/guru99-edu/R-Programming/master/poisons.csv"
+
+```
+
+```{r}
+# Loading packages
+library(dplyr)
+library(tibble)
+```
+
+```{r}
+# Storing dataset in a variable
+df<-read.csv(path)
+
+# Watching the glimpse of data
+glimpse(df)
+```
+
+```{r}
+# Checking the distinct values in each column
+df %>% summarize_all(n_distinct)
+```
+
+
+```{r}
+# Abandoning the first column as it onl consisted of ID numbers
+# Converting poison into factor as it had only 3 unique values
+sec.df<-read.csv(path) %>%
+  select(-X) %>%
+  mutate(poison = factor(poison, ordered=TRUE))
+
+# Watching glimpse of data after performing changes
+glimpse(sec.df)
+```
+
+
+```{r}
+# Grouping the dataset with poison and summarizing the count, mean and standard
+# deviation of time in each partition
+sec.df %>%
+  group_by(poison) %>%
+  summarize(
+    count_poison = n(),
+    mean_time = mean(time, na.rm = TRUE),
+    sd_time = sd(time, na.rm = TRUE)
+  )
+ 
+```
+
+
+```{r}
+# Grouping the dataset with treat and summarizing the count, mean and standard 
+# deviation of time in each partition
+sec.df %>%
+  group_by(treat) %>%
+  summarize(
+    count_poison = n(),
+    mean_time = mean(time, na.rm = TRUE),
+    sd_time = sd(time, na.rm = TRUE)
+  )
+```
+
+
+**ANOVA**                           
+Analysis of Variance (ANOVA) is very useful for analyzing datasets. It allows comparisons to be made between three or more groups of data.     
+There are two types of ANOVA that are commonly used, the One-Way ANOVA and the Two-Way ANOVA. 
+
+**A one-way ANOVA** is a type of statistical test that compares the variance in the group means within a sample whilst considering only one independent variable or factor.
+
+In a one-way ANOVA there are two possible hypotheses.         
+The null hypothesis (H0) is that there is no difference between the groups and equality between means.                      
+The alternative hypothesis (H1) is that there is a difference between the means and groups.             
+
+**A two-way ANOVA** is, like a one-way ANOVA, a hypothesis-based test. However, in the two-way ANOVA each sample is defined in two ways, and resultingly put into two categorical groups. The two-way ANOVA therefore examines the effect of two factors on a dependent variable.            
+
+Because the two-way ANOVA consider the effect of two categorical factors, and the effect of the categorical factors on each other, there are three pairs of null or alternative hypotheses for the two-way ANOVA. 
+
+
+
+**Performing One - way ANOVA Test:**                  
+
+```{r}
+# Performing One-way ANOVA test using inbuilt aov() function.
+# The columns taken into account are poison and time.
+one_way_anova <- aov(time~poison, data = sec.df)
+summary(one_way_anova)
+```
+
+
+```{r}
+# Writing user-defined function for one-way anova
+
+one_way_anova <- function(x, y) {
+    n <- length(y)
+    k <- length(unique(x))
+    classes <- unique(x)
+    
+    yi <- c()
+    ni <- c()
+    wss <- 0
+    for(i in c(1:k)){
+        yi[i] <- mean(y[x==classes[i]])
+        ni[i] <- length(y[x==classes[i]])
+        wss = wss + sum((y[x==classes[i]]-yi[i])**2)
+    }
+    
+    y_overall <- mean(y)
+    
+    bss <- sum(ni*(yi-y_overall)**2)
+    msb <- bss / (k-1)
+    msw <- wss / (n-k)
+    
+    print(paste("BSS = ",bss))
+    print(paste("WSS = ",wss))
+    print(paste("MSB = ",msb))
+    print(paste("MSW = ",msw))
+    
+    f_ratio <- msb/msw
+    print(paste("Calculated F-value = ",f_ratio))
+    print(paste("Tabulated F-value with 5% significance level: ",(qf(0.95,df1 = k-1,df2=n-k))))
+    
+}
+
+one_way_anova(sec.df$poison,sec.df$time)
+```
+
+
+**Performing Two - way ANOVA Test:**           
+
+```{r}
+# Performing Two-way ANOVA test using inbuilt aov() function.
+# The columns taken into account are poison + treat and time.
+two_way_anova = aov(time~poison + treat, data = sec.df)
+summary(two_way_anova)
+```
+
+
+**END of the Notebook**                    

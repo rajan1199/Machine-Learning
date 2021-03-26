@@ -1,0 +1,361 @@
+---
+title: "Lab Assignment 3" 
+output:
+  pdf_document: default
+  html_notebook: default
+---
+<center>
+# **Data Visualization using R**
+# *Submitted by: Rajan Kataria |18103076*
+</center>
+## **Task:**
+### **Your task is to understand and visualize dataset using different Data visualisation techniques.**
+## **Subtasks:**
+### **3.1 Visualize the data set using simple bar chart, stacked bar chart, grouped bar chart, pie chart, line chart, histogram and also using box plot.**
+
+### **Dataset: mtcars**
+
+Description         
+The data was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973–74 models).
+
+Format        
+A data frame with 32 observations on 11 (numeric) variables.
+
+[, 1]	mpg	Miles/(US) gallon           
+[, 2]	cyl	Number of cylinders           
+[, 3]	disp	Displacement (cu.in.)             
+[, 4]	hp	Gross horsepower        
+[, 5]	drat	Rear axle ratio        
+[, 6]	wt	Weight (1000 lbs)       
+[, 7]	qsec	1/4 mile time          
+[, 8]	vs	Engine (0 = V-shaped, 1 = straight)        
+[, 9]	am	Transmission (0 = automatic, 1 = manual)         
+[,10]	gear	Number of forward gears       
+[,11]	carb	Number of carburetors       
+
+Source                    
+Henderson and Velleman (1981), Building multiple regression models interactively. Biometrics, 37, 391–411.
+
+```{r}
+head(mtcars)
+```
+
+```{r}
+# Structure of the dataframe
+str(mtcars)
+```
+
+```{r}
+# Summary of dataset having minimum, maximum, first quartile, third quartile, mean and 
+# median of all the attributes
+summary(mtcars)
+```
+
+```{r}
+# Checking total number of NA (missing) values in the dataset
+sum(is.na(mtcars))
+```
+
+```{r}
+# Checking the unique values in each column
+apply(mtcars, 2, function(x) length(unique(x))) 
+```
+
+### **Simple Bar Chart**
+```{r}
+counts <- table(mtcars$gear)
+barplot(counts,
+        main="Car Distribution with gears",
+        xlab="Number of Gears",
+        ylab="Count of Cars",
+        col="purple")
+```
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+### **Simple Horizontal Bar Chart**
+```{r}
+# Simple Horizontal Bar Plot with Added Labels
+counts <- table(mtcars$gear)
+barplot(counts,
+        main="Car Distribution with gears",
+        horiz=TRUE,
+        ylab="Number of Gears",
+        xlab="Count of Cars",
+        col="red")
+```
+
+### **Stacked Bar Chart**
+```{r}
+counts <- table(mtcars$vs, mtcars$gear)
+# counts
+barplot(counts,
+        main="Car Distribution by Gears and VS",
+        xlab="Number of Gears",
+        ylab="Count of Cars",
+        col=c("yellow","pink"),
+        legend = rownames(counts) )
+```
+
+
+```{r}
+counts<-table(mtcars$cyl, mtcars$gear)
+barplot(counts,
+        main = "Car Distribution by Gears and Cyclinders",
+        xlab = "Number of Gears",
+        ylab = "Count of Cars", 
+        col = c("blue","red","yellow"),
+        legend = rownames(counts))
+```
+
+### **Grouped Bar Chart**
+```{r}
+counts <- table(mtcars$vs, mtcars$gear)
+barplot(counts,
+        main="Car Distribution by Gears and VS",
+        xlab="Number of Gears",
+        ylab="Count of Cars",
+        col=c("green","red"),
+        legend = rownames(counts),
+        beside=TRUE)
+```
+
+```{r}
+counts<-table(mtcars$cyl, mtcars$gear)
+barplot(counts,
+        main = "Car Distribution by Gears and Cyclinders",
+        xlab = "Number of Gears",
+        ylab = "Count of Cars", 
+        col = c("blue","red","yellow"),
+        legend = rownames(counts),
+        beside = TRUE)
+```
+
+### **Pie Chart**
+```{r}
+carburetors <- table(mtcars$carb)
+#Cal % values
+percent<- round(100*carburetors/sum(carburetors), 1)
+#Create labels for each pie in the chart
+pielabels<- paste(names(percent), ", ", percent, "%", sep = "")
+#R code to create the Pie Chart
+pie(carburetors,
+    col = rainbow(length(carburetors)),
+    labels = pielabels ,
+    main = '% of Carburetors',
+    cex = 0.8)
+#Legend for the pie chart
+legend("topright",
+       c("Carburetor-1","Carburetor-2","Carburetor-3","Carburetor-4","Carburetor-6","Carburetor-8"),
+       cex=0.8,
+       fill=  rainbow(length(carburetors)))
+```
+
+### **Line Chart**
+```{r}
+plot(x = mtcars$wt,
+     y = mtcars$mpg,
+     main = "Line Plot distribution for mpg v/s wt",
+     type = "l")
+points(x = mtcars$wt,
+       y = mtcars$mpg, 
+       col="red")
+```
+
+### **Histogram**
+```{r}
+hist (mtcars$mpg, breaks=10, xlab="mpg Miles/(US) gallon", col='blue')
+```
+
+### **Box Plot**
+```{r}
+boxplot(mtcars$mpg~mtcars$gear,data=mtcars,
+        xlab="Number of gears", 
+        ylab="MPG", 
+        main="Boxplot to show the distribution of MPG values per number of gears",
+        col = "lightgreen")
+```
+
+### **Scatter Plot**
+
+```{r}
+plot(mtcars$wt, mtcars$mpg,
+     main="Distribution of Car Mileage vs Car Weight",
+     xlab="Car Weight (1000 lbs)",
+     ylab="Miles Per Gallon ",
+     col = "blue")
+```
+
+
+### **3.2 Calculate the five number summary for visualizing the data set using box plot.**
+### **Dataset: airquality **
+Description     
+Daily air quality measurements in New York, May to September 1973.      
+
+Format      
+A data frame with 153 observations on 6 variables.     
+
+[,1]	Ozone	numeric	Ozone (ppb)    
+[,2]	Solar.R	numeric	Solar R (lang)       
+[,3]	Wind	numeric	Wind (mph)      
+[,4]	Temp	numeric	Temperature (degrees F)       
+[,5]	Month	numeric	Month (1--12)       
+[,6]	Day	numeric	Day of month (1--31)         
+
+Source
+The data were obtained from the New York State Department of Conservation (ozone data) and the National Weather Service (meteorological data).
+
+```{r}
+# Storing datset in some temporary variable
+dff<-airquality
+```
+
+
+### **Explore Dataset**
+```{r}
+# Checking the structure of dataset using str() function
+str(dff)
+```
+
+```{r}
+#Checking the head of the dataset using head()
+head(dff)
+
+```
+
+```{r}
+# Summary of dataset having minimum, maximum, first quartile, third quartile, mean and # median of all the attributes
+summary(dff)
+```
+
+### **Checking missing Values**
+```{r}
+# Checking total number of NA (missing) values in the dataset
+sum(is.na(dff))
+```
+
+
+```{r}
+# Applying anyNA() on all columns of the dataset
+NAs<- mapply(anyNA,dff) 
+NAs
+```
+
+### **Handling missing Values**
+```{r}
+# Replace NA with monthly mean in Ozone and Solar.R
+for (i in 1:nrow(dff)){
+  
+  if(is.na(dff[i,"Ozone"])){
+    dff[i,"Ozone"]<- mean(dff[which(dff[,"Month"]==dff[i,"Month"]),"Ozone"],na.rm = TRUE)
+  }
+
+    if(is.na(dff[i,"Solar.R"])){
+      dff[i,"Solar.R"]<- mean(dff[which(dff[,"Month"]==airquality[i,"Month"]),"Solar.R"],na.rm = TRUE)
+  }
+}
+```
+
+```{r}
+#Checking the total of missing values in the dataset once again
+sum(is.na(dff))
+
+NAs.now<- mapply(anyNA,dff) 
+NAs.now
+```
+
+```{r}
+# Checking the unique values in each column
+apply(dff, 2, function(x) length(unique(x))) 
+```
+
+### **Checking presence of outliers**
+```{r}
+#Box plot for the dataset
+boxplot(dff)
+```
+<br />
+An outlier is a data point that differs significantly from other observations. An outlier may be due to variability in the measurement or it may indicate experimental error; the latter are sometimes excluded from the data set. It can be seen that the attributes Ozone and Wind have outliers. Outliers are the data points above and below the upper fence and lower fence of the box plot respectively.
+
+
+### **Removing outliers**
+Removing outliers or handling outliers is necessary as they can cause serious problems in stastical analyses.
+```{r}
+#Box plot for Ozone
+boxplot(dff$Ozone)
+```
+
+
+```{r}
+#Summary of Ozone 
+summary(dff$Ozone)
+```
+
+
+```{r}
+#Inter quartile range = 3rd quartile value - 1st quartile value
+IQR.Ozone=59.12-21.00
+
+# Value of upper fence = Third Quartile Value + 1.5 * Inter-quartile range 
+UpFence.Ozone=59.12+1.5*IQR.Ozone
+
+# Printing values of IQR and Upper fence
+IQR.Ozone
+UpFence.Ozone
+```
+
+```{r}
+# Box plot for Wind
+boxplot(dff$Wind)
+```
+
+
+```{r}
+#Summary of Wind
+summary(dff$Wind)
+```
+
+```{r}
+
+#Inter quartile range = 3rd quartile value - 1st quartile value
+IQR.Wind=11.500-7.400
+
+# Value of upper fence = Third Quartile Value + 1.5 * Inter-quartile range 
+UpFence.Wind=11.500+1.5*IQR.Wind
+
+# Printing values of IQR and Upper fence
+IQR.Wind
+UpFence.Wind
+```
+
+
+There is no need of considering the lower fence here as no attribute has the value lesser than their respective lower fences.
+<br />
+Value of lower fence = First Quartile value - 1.5 * inter-Quartile Range
+```{r}
+# Subsetting the dataset dff such that the value of Ozone and Wind are lower than the upper fence and putting it in a new variable "dff.clean" 
+dff.clean=subset(dff, Ozone<116.3 & Wind<17.65)
+boxplot(dff.clean)
+```
+No data points above the upper fence or below the lower fence of box plots found in dff.clean. Hence the outliers got removed.
+
+```{r}
+# Getting structure of clean dataset
+str(dff.clean)
+```
+
+
+```{r}
+# Finding the differences in number of observations in dataset before and after outlier removal.
+nrow(dff)
+nrow(dff.clean)
+nrow(dff) - nrow(dff.clean)
+```
+We can see that after outlier removal, 7 rows (observations/tuples) got removed from the dataset.
+
+```{r}
+# Summary of clean dataset having no missing values and no outliers. It shows minimum, maximum, first quartile, third quartile, mean and median of all the attributes
+summary(dff.clean)
+```
+
+### **End of R notebook**

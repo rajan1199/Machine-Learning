@@ -1,0 +1,306 @@
+---
+title: "Data Analytics Laboratory (CSPC-322)"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+# **Lab Assignment 3**
+
+# *Submitted by:*
+<li>**Name:** Rajan Kataria</li>
+<li>**Roll. No.** 18103076</li>
+<li>**Branch/Sem:** CSE/6th</li>
+<li>**Group:** G4</li>
+
+## **Task:**
+**Know the significance of different types of t-test**     
+
+## **Subtasks:**         
+Select a suitable dataset for following test of significance (Hypothesis testing), and interpret output parameters and their significance with respect to the selected data set and Hypothesis.        
+
+**3.1** One sample t-test      
+**3.2** Two sample t-test      
+**3.3** Paired t-test           
+
+You need to perform above given task using two different methods.    
+**1.** Use inbuilt function i.e. t.test() or wilcox.test().     
+**2.** Design your own functions to perform the above stated task.     
+
+```{r}
+# Importing built-in datasets library
+library(datasets)
+```
+
+## **Task 3.1: One sample t-test**               
+
+**Dataset Used:** The dataset being used for this task is the ToothGrowth dataset from built-in **datasets** package of R.
+
+```{r}
+#Understanding the structure of data
+str(ToothGrowth)
+```
+
+We can see that the dataset consists of 60 observations corresponding to three attributes:        
+len: Tooth Length        
+supp: Supplement Type (VC - Vitamin C or OJ - Orange Juice)       
+dose: Dose in milligrams/day        
+
+To conduct the one sample t-test, we require only first attribute i.e. len.      
+
+```{r}
+# Getting subset of data for conducting one-sample t-test
+one_sample_data = ToothGrowth$len
+print("Population: ")
+print(one_sample_data)
+paste("Size of population = ",length(one_sample_data))
+```
+
+
+```{r}
+#Getting the mean and standard deviation of the population
+mean_p = mean(one_sample_data)
+std_p = sd(one_sample_data)
+paste("Mean of population = ",mean_p)
+paste("Standard Deviation of population = ",std_p)
+```
+
+
+```{r}
+# Getting a sample of size 20 from the population
+one_sample = sample(one_sample_data, size=20, replace=F)
+print("Sample: ")
+print(one_sample)
+```
+
+
+```{r}
+# Applying t-test using inbuilt function t.test()
+ttest<-t.test(one_sample,mu=mean_p)
+ttest
+```
+
+```{r}
+names(ttest)
+```
+
+
+```{r}
+ttest$p.value
+```
+
+
+```{r}
+# Applying t-test using inbuilt function wilcox.test()
+wilcox.test(one_sample,mu=mean_p)
+```
+
+
+```{r}
+
+# Using user-defined function to conduct one-sample t-test
+one_sample_t_test <- function(sampl, mu = 0, two_tailed=TRUE){
+ n <- length(sampl)
+ x_bar <- mean(sampl)
+ s <- sd(sampl)
+ t <- (x_bar - mu) / (s / sqrt(n))
+ p_value <- pt(-abs(t),df=n-1)
+ if(two_tailed == TRUE){
+ p_value <- 2*p_value
+ }
+
+ print("Results of one-sample t-test:")
+ print(paste("t = ",t," df = ",n-1," p-value = ",p_value))
+ print(paste("True mean = ",mu))
+ print(paste(" - NULL Hypothesis: Sample mean is equal to true mean."))
+ print(paste(" - Alternate Hypothesis: Sample mean is not equal to true mean."))
+ print(paste("Mean of sample = ",x_bar))
+ print(paste("Standard Deviation of sample = ",s))
+
+}
+one_sample_t_test(one_sample,mu=mean_p)
+
+```
+```{r}
+dim(mtcars)
+```
+
+
+```{r}
+# One-tailed one-sample t-test
+one_sample_t_test(one_sample,mu=mean_p,two_tailed=FALSE)
+```
+
+
+## **Task 3.2: Two sample t-test**            
+
+**Dataset Used:** The dataset being used for this task is the ToothGrowth dataset from built-in **datasets** package of R.           
+
+For two sample t-test, we'll compare the samples based on categories i.e. 'VC' and 'OJ'.                   
+
+```{r}
+two_sample_vc = subset(ToothGrowth,supp=="VC",len,drop=T)
+two_sample_oj = subset(ToothGrowth,supp=="OJ",len,drop=T)
+print("Sample 1: ")
+print(two_sample_vc)
+print("Sample 2: ")
+print(two_sample_oj)
+```
+
+
+```{r}
+# Performing t-test on two samples using t.test() function
+t.test(two_sample_vc,two_sample_oj)
+
+```
+
+
+```{r}
+# Performing t-test on two samples using wilcox.test() function
+wilcox.test(two_sample_vc, two_sample_oj)
+```
+
+
+```{r}
+# User-defined function to conduct two-sample test
+two_sample_t_test <- function(sample1, sample2, two_tailed=TRUE){
+ x_bar <- mean(sample1)
+ y_bar <- mean(sample2)
+ sx <- sd(sample1)
+ sy <- sd(sample2)
+ n1 <- length(sample1)
+ n2 <- length(sample2)
+
+ df <- n1+n2-2
+
+ ss <- ((n1-1)*sx*sx + (n2-1)*sy*sy) / (n1+n2-2)
+ s <- sqrt(ss)
+
+ t <- (x_bar - y_bar) / (s * sqrt(1/n1 + 1/n2))
+
+ p_value <- pt(-abs(t),df=df)
+ if(two_tailed == TRUE){
+ p_value <- 2*p_value
+ }
+
+ print("Results of two-sample t-test:")
+ print(paste("t = ",t," df = ",n1+n2-2," p-value = ",p_value))
+
+ print(paste(" - NULL Hypothesis: Difference in means of two samples is 0."))
+ print(paste(" - Alternate Hypothesis: Difference in both sample means is not zero."))
+ print(paste("Mean of sample 1 = ",x_bar))
+ print(paste("Standard Deviation of sample 1 = ",sx))
+ print(paste("Mean of sample 2 = ",y_bar))
+ print(paste("Standard Deviation of sample 2 = ",sy))
+
+}
+two_sample_t_test(two_sample_vc, two_sample_oj)
+```
+
+
+```{r}
+# Importing the dataset
+life_literate <- read.csv("life_literate.csv")
+head(life_literate)
+```
+
+
+```{r}
+# Exploring the structure of data
+str(life_literate)
+```
+
+
+## **Task 3.2: Two sample t-test**            
+
+**Dataset Used:**For this test, we'll be using the **Life Expectancy vs Literacy Rate** by Country in 2014 dataset downloaded from https://mathcs.org/statistics/datasets/index.html
+
+
+We can see above that the dataset consists of 205 observations under 3 attributes:  
+Country     
+Life.Expectancy      
+Literacy.Rate                   
+
+For Paired t-test, we'll consider the Life Expectancy v/s Literacy Rate of data.  
+
+
+```{r}
+life <- life_literate$Life.Expectancy....
+literacy <- life_literate$Literacy.Rate....
+print("Life Expectancy: ")
+print(life)
+print("Literacy Rate: ")
+print(literacy)
+```
+
+
+```{r}
+# Paired t-test using t.test() function
+t.test(life, literacy, paired = TRUE)
+```
+
+
+```{r}
+# Paired t-test using wilcox.test() function
+wilcox.test(life, literacy, paired = TRUE)
+```
+
+
+```{r}
+# User-defined function to conduct paired t-test
+paired_t_test <- function(X, Y, two_tailed=TRUE){
+ D <- X-Y
+ d_bar = mean(D)
+ std_d = sd(D)
+ n = length(D)
+ df = n-1
+
+ t <- d_bar / (std_d / sqrt(n))
+
+ p_value <- pt(-abs(t),df=df)
+ if(two_tailed == TRUE){
+ p_value <- 2*p_value
+ }
+
+ print("Results of paired t-test:")
+ print(paste("t = ",t," df = ",df," p-value = ",p_value))
+
+ print(paste(" - NULL Hypothesis: Difference in means of two samples is 0."))
+ print(paste(" - Alternate Hypothesis: Difference in both sample means is not zero."))
+ print(paste("Mean of differences = ",d_bar))
+ print(paste("Standard Deviation of differences = ",std_d))
+}
+paired_t_test(life, literacy)
+```
+
+
+#### Assign 4
+
+```{r}
+crop.df<-read.csv('crop.data.csv')
+```
+
+```{r}
+dim(crop.df)
+```
+
+
+```{r}
+str(crop.df)
+```
+
+
+```{r}
+head(crop.df)
+```
+```{r}
+table(crop.df$density)
+```
+
+
+```{r}
+library(dplyr)
+crop.df %>% summarize_all(n_distinct)
+```
+

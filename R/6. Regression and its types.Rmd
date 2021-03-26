@@ -1,0 +1,271 @@
+---
+title: "Data Analytics Laboratory (CSPC-322)"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+# **Lab Assignment 5**                 
+
+# **Submitted by:**                                    
+<li>**Name:** Rajan Kataria</li>          
+<li>**Roll. No.** 18103076</li>               
+<li>**Branch/Sem:** CSE/6th</li>            
+<li>**Group:** G4</li>       
+
+## **Task: Implementation of different types of regression**            
+
+## **Regression Analysis**           
+In statistical modeling, **regression analysis** is a set of statistical processes for estimating the relationships between a dependent variable (often called the 'outcome variable') and one or more independent variables (often called 'predictors', 'covariates', or 'features').           
+
+## **Types of Regression**          
+<li>Linear Regression</li>                 
+<li>Multiple Regression</li>                
+<li>Curvilinear Regression</li>       
+<li>Power Curve</li>                 
+<li>Lasso and Ridge Regression</li>         
+
+
+## **5.1 Linear Regression**
+Linear regression is one of the easiest and most popular Machine Learning algorithms. It is a statistical method that is used for predictive analysis. Linear regression makes predictions for continuous/real or numeric variables such as sales, salary, age, product price, etc.
+
+Linear regression algorithm shows a linear relationship between a dependent (y) and one or more independent (x) variables, hence called as linear regression. Since linear regression shows the linear relationship, which means it finds how the value of the dependent variable is changing according to the value of the independent variable.
+
+The linear regression model provides a sloped straight line representing the relationship between the variables.
+y=a0+a1*x               
+Here,                                         
+y = Dependent Variable (Target Variable)               
+x = Independent Variable (predictor Variable)                          
+a0 = Intercept of the line (Gives an additional degree of freedom)                
+a1 = Linear regression coefficient (scale factor to each input value). The values for x and y variables are training datasets for Linear Regression model representation.      
+
+In R lm function is used for making the model based on linear regression.         
+
+```{r}
+#Linear Regression 
+
+# The predictor vector
+weight.kg <- c(56,42,72,36,63,47,55,49,38,42,68,60)
+
+# The response vector
+height.cm <- c(147,125,180,118,149,128,150,145,115,140,152,155)
+
+df<-data.frame(weight.kg, height.cm)
+
+# Apply the lm() function.
+relation <- lm(weight.kg~height.cm)
+
+print(relation)
+print(summary(relation))
+```
+
+
+```{r}
+# Plot the line of regression
+plot(weight.kg~height.cm,col="blue",main="Height v/s Weight",pch=16,
+     xlab = "Weight(kg)",ylab = "Height(cm)")
+abline(relation, col="red", lwd=3)
+```
+
+## **5.2 Multiple Regression**               
+Mutiple regression is an extension of linear regression into relationship between more than two variables. In simple linear relation we have one predictor and one response variable, but in multiple regression we have more than one predictor variable and one response variable.
+
+The general mathematical equation for multiple regression is:           
+y = a + b1\*x1 + b2\*x2 + ... + bn*xn                      
+
+Following is the description of the parameters used:              
+y is the response variable.                      
+a, b1, b2, ..., bn are the coefficients.                 
+x1, x2, ..., xn are the predictor variables.                        
+
+```{r}
+# Multiple Regression
+# airquality dataset considered
+library(datasets)
+relation.multiple = lm(Ozone~Temp+Solar.R+Wind , data = airquality)
+print(relation.multiple)
+summary(relation.multiple)
+
+```
+
+
+```{r}
+# Get the Intercept and coefficients as vector elements.
+
+cat("Coefficients of multiple regression equation:\n\n")
+
+intercept.multiple <- coef(relation.multiple)[1]
+coeff.Temp <- coef(relation.multiple)[2]
+coeff.Solar<- coef(relation.multiple)[3]
+coeff.Wind<- coef(relation.multiple)[4]
+
+print(intercept.multiple)
+print(coeff.Solar)
+print(coeff.Temp)
+print(coeff.Wind)
+```
+
+
+## **5.3 Curvilinear Regression**       
+When we have nonlinear relations, we often assume an intrinsically linear model and then we fit data to the model using polynomial regression. That is, we employ some models that use regression to fit curves instead of straight lines. The technique is known as curvilinear regression analysis. To use curvilinear regression analysis, we test several polynomial regression equations. Polynomial equations are formed by taking our independent variable to successive powers. For example, we could have
+
+Y' = a + b1*x1 -Linear                       
+Y' = a + b1\*x1 + b2\*x1^2 -Quadratic               
+Y' = a + b1\*x1 + b2\*x1^2+ b3\*x1^3 -Cubic                           
+
+
+```{r}
+xvalues <- c(1.6,2.1,2,2.23,3.71,3.25,3.4,3.86,1.19,2.21)
+yvalues <- c(5.19,7.43,6.94,8.11,18.75,14.88,16.06,19.12,3.21,7.58)
+
+# Take the assumed values and fit into the model.
+model <- nls(yvalues ~ b1*xvalues^2+b2,start = list(b1 = 1,b2 = 1))
+model
+# m <- nls(y ~ a + b * I(var^n),data = df,start =list(a=1,b=1,n=2) )
+
+# Get the sum of the squared residuals.
+print(sum(resid(model)^2))
+
+# Get the confidence intervals on the chosen values of the coefficients.
+print(confint(model))
+
+```
+```{r}
+# For Orange dataset
+# fit1 <- lm(log(age) ~ log(circumference), data = df)
+# m <- nls(age ~ a*(circumference^b), df, start = list(a = exp(coef(fit1)[1]), b = coef(fit1)[2])) # power formula: y = a*x^b
+
+# Plot these values.
+plot(xvalues, yvalues, col="red")
+
+# Plot the chart with new data by fitting it to a prediction from 100 data points.
+new.data <- data.frame(xvalues = seq(min(xvalues),max(xvalues),len = 100))
+lines(new.data$xvalues,predict(model,newdata = new.data))
+
+```
+
+
+### **5.3.1 Quadratic Regression** 
+```{r}
+#  Quadratic Regression for airquality dataset (Ozone and Wind)
+dff<-airquality
+# Replace NA with monthly mean in Ozone and Solar.R
+for (i in 1:nrow(dff)){
+  
+  if(is.na(dff[i,"Ozone"])){
+    dff[i,"Ozone"]<- mean(dff[which(dff[,"Month"]==dff[i,"Month"]),"Ozone"]
+                          ,na.rm = TRUE)
+  }
+
+    if(is.na(dff[i,"Solar.R"])){
+      dff[i,"Solar.R"]<- mean(dff[which(dff[,"Month"]==airquality[i,"Month"]),"Solar.R"],na.rm = TRUE)
+  }
+}
+
+modelnew <- lm(dff$Ozone ~ dff$Wind + I(dff$Wind^2))
+plot(dff$Ozone~dff$Wind)
+lines(smooth.spline(dff$Wind, predict(modelnew)), col="blue", lwd=3)
+```
+
+### **5.3.2 Exponential Regression**
+```{r}
+library(ggplot2)
+dff.clean.fac<-dff
+dff.clean.fac$Day<-as.factor(dff$Day)
+dff.clean.fac$Month<-as.factor(dff$Month)
+
+# Exponential Regression for Ozone and Temperature (Month wise)
+plot3<-ggplot(dff.clean.fac, aes(x=Temp, y=Ozone, color=Month)) + geom_point()
+plot3<-plot3+ stat_smooth(method = "lm", se=FALSE, formula = (y ~ exp(x)), size = 1)
+print(plot3 + labs(y="Mean Ozone Concentration(ppb)", x="Temperature(F)") 
+      + ggtitle("Mean ozone Concentration v/s Temperature"))
+
+```
+
+## **5.4 Power Curve**  
+Power Regression is one in which the response variable is proportional to the explanatory variable raised to a power. Mathematically,
+y = a * x^b
+
+```{r}
+# x <- 1:100
+# y <- 1 + x^0.55 + rnorm(100, 0, 0.01)
+
+# The predictor vector
+x <- c(56,42,72,36,63,47,55,49,38,42,68,60)
+
+# The response vector
+y <- c(147,125,180,118,149,128,150,145,115,140,152,155)
+
+fit<-lm(log(y)~log(x))
+power.model <- nls(y ~ a* (x^b), start = list(a =exp(coef(fit)[1]), b = coef(fit)[2]))
+print(power.model)
+summary(power.model)
+
+```
+```{r}
+plot(x,y,col="blue", main = "Height v/s Weight",cex = 1.3,
+     pch = 16,xlab = "Weight in kg",ylab = "Height in cm")
+lines.default(smooth.spline(x, predict(power.model)),col='red', lwd=3)
+# as we have drawn the regression line in only range x = [35,70],
+# it looks more like a straight line. If you see the curve formed on greater range
+# in next plot, it is more like a power curve
+```
+```{r}
+curve(18.9863*(x^0.5099), 0, 1000)
+```
+
+## **5.5 Ridge and Lasso Regression**         
+**Regularization:** Regularization is one of the most important concepts of machine learning. It is a technique to prevent the model from overfitting by adding extra information to it.                   
+
+Sometimes the machine learning model performs well with the training data but does not perform well with the test data. It means the model is not able to predict the output when deals with unseen data by introducing noise in the output, and hence the model is called overfitted. This problem can be deal with the help of a regularization technique.                 
+
+
+**Techniques of Regularization**                                        
+There are mainly two types of regularization techniques, which are given below:
+
+### **5.5.1 Ridge Regression**                
+Ridge regression is one of the types of linear regression in which a small amount of bias is introduced so that we can get better long-term predictions.Ridge regression is a regularization technique, which is used to reduce the complexity of the model. It is also called as L2 regularization.                   
+In this technique, the cost function is altered by adding the penalty term to it. The amount of bias added to the model is called Ridge Regression penalty. We can calculate it by multiplying with the lambda to the squared weight of each individual feature.
+
+```{r}
+# Import Library
+# install.packages("glmnet")
+```
+
+
+```{r}
+ library(glmnet)
+
+# Ridge Regression
+
+# The predictor vector
+weight.kg <- c(56,42,72,36,63,47,55,49,38,42,68,60)
+
+# The response vector
+height.cm <- c(147,125,180,118,149,128,150,145,115,140,152,155)
+df<-data.frame(weight.kg, height.cm)
+
+ridge.mod<-glmnet(df,df$height.cm,alpha=0,lambda=1)
+summary(ridge.mod)
+```
+
+```{r}
+predict(ridge.mod,s=0,type='coefficients')
+```
+
+### **5.5.2 Lasso Regression**
+Lasso regression is another regularization technique to reduce the complexity of the model. It stands for Least Absolute and Selection Operator. It is similar to the Ridge Regression except that the penalty term contains only the absolute weights instead of a square of weights. Since it takes absolute values, hence, it can shrink the slope to 0, whereas Ridge Regression can only shrink it near to 0. 
+It is also called as L1 regularization. Some of the features in this technique are completely neglected for model evaluation. Hence, the Lasso regression can help us to reduce the overfitting in the model as well as the feature selection.           
+```{r}
+# Lasso Regression
+lasso.mod<-glmnet(df,df$height.cm,alpha=1,lambda=1)
+summary(lasso.mod)
+```
+
+```{r}
+predict(lasso.mod,s=0,type='coefficients')
+```
+
+
+
+## **End of R notebook**
+## **Prepared by: RAJAN KATARIA (18103076)**

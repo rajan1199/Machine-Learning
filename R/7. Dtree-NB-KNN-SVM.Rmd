@@ -1,0 +1,418 @@
+---
+title: "Lab Assignment-6 (Implementing Classification Algorithms)"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+# *Submitted by:*                          
+<li>**Name:** Rajan Kataria</li>                 
+<li>**Roll. No.** 18103076</li>                    
+<li>**Branch/Sem:** CSE/6th</li>                  
+<li>**Group:** G4</li>                            
+                      
+## **Task:**                                            
+**Implementing the classification models using R**                 
+
+## **Subtasks:**   
+Select a suitable datasetand implement the following classification algorithm.            
+- Decision Trees                                
+- Naive Bayes Classifiers                       
+- K-NN Classifiers                            
+- Support Vector Machines(SVM’s)         
+
+## **Classification**                   
+Classification is the problem of identifying to which of a set of categories (subpopulations), a new observation belongs to, on the basis of a training set of data containing observations and whose categories membership is known.
+Classifications are discrete and do not imply order. Continuous, floating-point values would indicate a numerical, rather than a categorical, target. A predictive model with a numerical target uses a regression algorithm, not a classification algorithm.                               
+In the model build (training) process, a classification algorithm finds the values of the predictors and the values of the target. Different classification algorithms
+use different techniques for finding relationships. These relationships are summarized in a model, which can then be applied to a different data set in which the class assignments are unknown.                   
+
+
+**Dataset:**                                       
+The dataset considered for the implementation of decision tree algorithm is https://www.kaggle.com/mjamilmoughal/fruits-with-colors-dataset
+You will be able to download .txt file from the above link. .txt file can be imported to MS Excel and then converted into required format, i.e., either .xlsx or .csv.                     
+ 
+```{r}
+# reading the dataset
+df <-read.csv("fruit.csv")
+```
+
+
+```{r}
+# viewing first 6 tuples
+head(df)
+```
+
+```{r}
+# Loading packages
+library(dplyr)
+library(tibble)
+```
+
+```{r}
+# glimpse of dataframe
+glimpse(df)
+```
+
+
+```{r}
+# summary of the dataset
+summary(df)
+```
+
+From all above analysis, it can be clearly seen that fruit_label and fruit_subtype have no role in predicting the fruit_name. Hence, we will not be considering these 2 attributes while making any classification model.
+
+```{r}
+# loading packages
+library(caret)
+library(party)
+```
+
+
+
+```{r}
+# Splitting the dataset into train and testing set
+sample=sample.int(n=nrow(df), size=round(0.75*nrow(df)), 
+                  replace=FALSE)
+train<-df[sample,]
+test<-df[-sample,]
+dim(train)
+dim(test)
+```
+
+ 
+## **Decision Tree Algorithm**             
+A Decision Tree is a simple representation for classifying examples. It is a Supervised Machine Learning where the data is continuously split according to a certain parameter.               
+Decision Tree consists of:                           
+- Nodes: Test for the value of a certain attribute.         
+- Edges/ Branch: Correspond to the outcome of a test and connect to the next node or leaf.                         
+- Leaf nodes: Terminal nodes that predict the outcome (represent class labels or class distribution).                
+
+```{r}
+# training the decision tree model on training set
+dtree.cart<-ctree(fruit_name ~ mass + width + height + color_score,
+                      data = train)
+
+# plotting the decision tree
+plot(dtree.cart)
+```
+
+
+
+```{r}
+# Summary of the model
+summary(dtree.cart)
+```
+
+
+
+```{r}
+# predicting the outcome of the test set using the model created
+pred.dtree<-predict(dtree.cart, test)
+```
+
+
+
+```{r}
+# Making the table comparing predicted and actual values of test set
+dtree.mat<-table(pred.dtree, test$fruit_name)
+dtree.mat
+```
+
+
+
+```{r}
+# Confusion matrix and other measures
+confusionMatrix(dtree.mat)
+```
+ 
+## **Naive Bayes Algorithm**                          
+Bayes’ Theorem provides a way that we can calculate the probability of a piece of data belonging to a given class, given our prior knowledge.      
+Bayes’ Theorem is stated as:                      
+**P(class|data) = (P(data|class) * P(class)) / P(data)**, where P(class|data) is the probability of class given the provided data.                       
+Naive Bayes is a classification algorithm for binary and multiclass classification problems. It is called Naive Bayes or idiot Bayes because the calculations of the probabilities for each class are simplified to make their calculations tractable. 
+Rather than attempting to calculate the probabilities of each attribute value, they are assumed to be conditionally independent given the class value. In simple terms, a Naive Bayes classifier assumes that the presence of a particular feature in a class is unrelated to the presence of any other features. This is a very strong assumption that is most unlikely in real data, i.e. that the attributes do not interact. Nevertheless, the approach performs surprisingly well on data where
+this assumption does not hold.                   
+
+```{r}
+# install.packages("e1071")
+library(e1071)
+```
+
+
+
+```{r}
+# Making the naive bayes classification model
+nb<-naiveBayes(fruit_name ~ mass + width + height + color_score,
+                      data = train)
+```
+
+
+
+```{r}
+# Summarizing the model
+summary(nb)
+```
+
+
+
+```{r}
+# predicting the outcome of the test set using the model created
+pred.nb<-predict(nb, test)
+```
+
+
+
+```{r}
+# Making the table comparing predicted and actual values of test set
+nb.mat<-table(pred.nb, test$fruit_name)
+nb.mat
+```
+
+
+
+```{r}
+# Confusion matrix and other measures
+confusionMatrix(nb.mat)
+```
+
+
+## **KNN Classifier Algorithm**                        
+KNN is a non-parametric and lazy learning algorithm. Non-parametric means there is no assumption for underlying data distribution. In other words, the model structure determined from the dataset. This will be very helpful in practice where most of the real world datasets do not follow mathematical theoretical assumptions. Lazy algorithm means it does not need any training data points for model generation. All training data used in the testing phase. This makes training faster and testing phase slower and costlier. Costly testing phase means time and memory. In the worst case, KNN needs more time to scan all data points and scanning all data points will require more memory for storing training data.        
+
+```{r}
+#install.packages("class")
+library(class)
+```
+
+
+
+```{r}
+# making all the attributes as numerical,  
+# beacuse factor variables are not allowed in knn function
+df.num<-df
+df.num$fruit_name<-as.numeric(df.num$fruit_name)
+df.num$fruit_subtype<-as.numeric(df.num$fruit_subtype)
+```
+
+
+
+```{r}
+# splitting the new dataset into training and test set
+sample=sample.int(n=nrow(df.num), size=round(0.75*nrow(df.num)), 
+                  replace=FALSE)
+train.num<-df.num[sample,]
+test.num<-df.num[-sample,]
+dim(train.num)
+dim(test.num)
+```
+
+
+```{r}
+# Removing fruit_label and fruit_subtype from numerical training set 
+train.num=train.num[,-1]
+train.num=train.num[,-2]
+
+# train.num
+```
+
+
+```{r}
+# Removing fruit_label and fruit_subtype from numerical testing set
+test.num=test.num[,-1]
+test.num=test.num[,-2]
+# test.num
+```
+
+```{r}
+# Making the KNN classifier model
+knn.classifier= knn(train=train.num, test=test.num, cl= train.num$fruit_name)
+```
+
+
+
+```{r}
+# Summarizing the model
+summary(knn.classifier)
+```
+
+
+```{r}
+# Making the table comparing predicted and actual values of test set
+table.knn<-table(test.num$fruit_name,knn.classifier)
+table.knn
+```
+
+
+```{r}
+# Confusion matrix and other measures
+confusionMatrix(table.knn)
+```
+
+
+
+## **SVM Classifier Algorithm**                      
+Generally, Support Vector Machines is considered to be a classification approach, it but can be employed in both types of classification and regression problems. It can easily handle multiple continuous and categorical variables. SVM constructs a hyperplane in multidimensional space to separate different classes. SVM generates optimal hyperplane in an iterative manner, which is used to minimize an error. The core idea of SVM is to find a maximum marginal hyperplane (MMH) that best divides the dataset into classes.                          
+The main objective is to segregate the given dataset in the best possible way. The distance between the either nearest points is known as the margin. The objective is to select a hyperplane with the maximum possible margin between support vectors in the given dataset.                               
+
+```{r}
+# Making the SVM classifier model
+classifier.svm<-svm(fruit_name ~ mass + width + height + color_score,
+                    data = train, type='C-classification',
+                    kernel='linear')
+```
+
+
+
+```{r}
+# Summarizing the model
+summary(classifier.svm)
+```
+
+
+
+```{r}
+# predicting the outcome of the test set using the model created
+pred.svm=predict(classifier.svm, newdata=test)
+```
+
+
+
+```{r}
+# Making the table comparing predicted and actual values of test set
+table.svm=table(test$fruit_name,pred.svm)
+table.svm
+```
+
+
+
+```{r}
+# Confusion matrix and other measures
+confusionMatrix(table.svm)
+```
+
+
+## **User-defined function for KNN** 
+
+Working of KNN Algorithm:                           
+Step 1: Load the training as well as test data.                       
+Step 2: Choose the value of K, i.e. the nearest data points. K can be any integer.          
+Step 3: For each point in the test data do the following:      
+3.1 Calculate the distance between test data and each row of training data with the help of any of the method namely: Eudidean, Manhattan or Hamming distance. The most commonly used method to calculate distance is Euclidean.     
+3.2 Now, based on the distance value, sort them in ascending order.          
+3.3 Next, it will choose the top K rows from the sorted array.       
+3.4 Now it will assign a class to the test point based on most frequent class of these rows.                        
+Step 4: End                   
+```{r}
+# We will be considering df.num here as used in KNN implementation above.
+# Test and Train set formed from df.num are test.num and test.num,
+# after removal of fruit_subtype and fruit_label
+dim(train.num)
+dim(test.num)
+```
+
+
+```{r}
+# function to calculate Euclidian distance
+euclideanDist = function(a,b){
+  d=0
+  for(i in c(1:(length(a)-1))){
+    d=d+(a[[i]]-b[[i]])^2
+  }
+  d=sqrt(d)
+  return(d)
+}
+
+# user defined function to implement KNN classification
+knn.custom = function(test.num, train.num, k.val){
+  # empty prediction vector
+  predict=c()
+  
+  # Looping over each record of test data
+  for(i in c(1:nrow(test.num))){
+    
+    eu.dist=c() #empty vector
+    eu.char=c() #empty vector
+    
+    #class variables initialized with 0
+    class1=0
+    class2=0
+    class3=0
+    class4=0
+    
+    # Looping over train data
+    for(j in c(1:nrow(train.num))){
+      # Append euc distance b/w test data point and training data point to eu.dist
+      eu.dist=c(eu.dist, euclideanDist(test.num[i,], train.num[j,]))
+      
+      # Append class variable of training data in eu.char
+      eu.char=c(eu.char, as.character(train.num[j,][[1]]))
+      # eu.char
+    }
+    
+    # dataframe created with eu.char and eu.dist
+    eu=data.frame(eu.char, eu.dist)
+    #print(eu)
+    # sort ey dataframe to get top k neighbours
+    eu=eu[order(eu$eu.dist),]
+    # eu dataframe with top k neighbours
+    eu=eu[1:k.val,]
+    
+    # Loops over eu and counts classes of neighbours
+    for(k in c(1:nrow(eu))){
+      if(eu[k, 'eu.char']==1){
+        class1=class1+1
+      } else if(eu[k, 'eu.char']==2){
+        class2=class2+1
+      } else if(eu[k, 'eu.char']==3){
+        class3=class3+1
+      } else{
+        class4=class4+1
+      }
+    }
+    
+    if(class1>class2 && class1>class3 && class1>class4){
+        predict=c(predict,1)
+      } else if(class2>class1 && class2>class3 && class2>class4){
+        predict=c(predict,2)
+      } else if(class3>class1 && class3>class2 && class3>class4){
+        predict=c(predict,3)
+      } else{
+        predict=c(predict,4)
+      }
+  }
+  # return predict vector
+  return(predict)
+}
+
+accuracy = function(test.num){
+  correct=0
+  for(i in c(1:nrow(test.num))){
+    if(test.num[i,1]==test.num[i,6]){
+      correct=correct+1
+    }
+  }
+  accu=correct/nrow(test.num)*100
+  return(accu)
+}
+```
+
+
+```{r}
+# take no. of neighbours 
+k=16
+predictions=knn.custom(test.num,train.num,k)
+print("Predicted outcomes for test.data")
+predictions
+
+# add predictions as a column to the test.num (test set)
+test.num[,6]=predictions
+print("accuracy:")
+print(accuracy(test.num))
+```
+
+
+```{r}
+test.num
+```
+

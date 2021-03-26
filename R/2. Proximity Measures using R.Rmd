@@ -1,0 +1,337 @@
+---
+title: <center>![Logo](D:\NITJ\Study\SEM 6\CSPC-322 Data Analytics Laboratory\FRONT.jpg)</center>
+output:
+  pdf_document: 
+    latex_engine: xelatex
+  html_document:
+    df_print: paged
+---
+<center>
+# **LAB ASSIGNMENT 2**
+## **Proximity Measures using R**
+</center>
+### **Task:**
+#### **This task is to check your understanding of proximity measures, distance matrix, distance measures, cosine similarity and graphical analysis of data.**
+### **Subtask:**
+#### ** Calculate Distance measure of 2 vectors, matrix using distance measure eg. Jaccard Similarity, Euclidean, Manhattan, Supermum, Chebyshev, Minkowski Distance Measure.**
+#### ** Calculate cosine similarity of 2 vectors, matrix using cosine function in R.**
+### **2.1 Nominal attributes**
+```{r}
+# Making a dataframe of Nominal attributes
+
+Type <- c('Shirt', 'Pant', 'Lower', 'Shirt', 'Pant', 'T-Shirt')
+Color <- c('Red', 'Blue', 'Green', 'Red', 'Green', 'Yellow') 
+Cloth.df<- data.frame(Type, Color) 
+print(Cloth.df)
+```
+
+```{r}
+# Functions to calculate nominal dissimilarity of two tuples of a dataframe, say, a and b
+inter.sect <- function(a, b){
+  matches=0
+  for (i in c(1:length(a))){
+    if(a[i]==b[i]){
+      matches= matches+1
+    }
+  }
+  return (matches)
+}
+
+```
+
+
+```{r}
+nominal.diss <- function(a, b) {
+    total = length(a)
+    matches  = inter.sect(a, b)
+    return ((total-matches)/total)
+}
+
+
+# Display the dissimlarity of all the objects in dataframe in the form of dissimlarity matrix
+nominal.diss.mat <- matrix(nrow = 6, ncol = 6)
+for(i in c(1:6)){
+    for(j in c(1:6)){
+        nominal.diss.mat[i,j] <- nominal.diss(Cloth.df[i,], Cloth.df[j,])
+    }
+}
+print(nominal.diss.mat)
+```
+
+```{r}
+# inbuilt function to calculate the dissimilarity matrix for mixed attributes
+library(cluster)
+dis.mat1<-daisy(Cloth.df, metric="gower")
+dis.mat1
+```
+<br><br><br><br><br><br><br><br><br><br>
+
+### **2.2 Binary attributes**
+```{r}
+# Binary Attributes
+
+#    1  0
+# 1  q  r
+# 0  s  t
+
+# Making Matrix for binary attributes
+names<-c('Jack', 'Jim', 'Mary')
+gender<-c(1, 1, 0) # 1 for male and 0 for female
+fever<-c(1, 1, 1)
+cough<-c(0, 1, 0)
+test1<-c(1, 0, 1)
+test2<-c(0, 0, 0)
+test3<-c(0, 0, 1)
+test4<-c(0, 0, 0)
+
+binary.df <- cbind(gender, fever, cough, test1, test2, test3, test4)
+rownames(binary.df)<-names
+binary.df
+
+```
+
+```{r}
+# Function to calculate dissimilarity of symmetric and asymmetric attributes, 
+# as well as jaccard similarity of asymmetric attributes
+binary.diss<-function(a, b, asym){
+  q=0
+  r=0
+  s=0
+  t=0
+  for (i in 1:length(a)){
+    if(a[i]==1 & b[i]==1){
+      q=q+1
+    }
+    else if (a[i]==1 & b[i]==0){
+      r=r+1
+    }
+    else if (a[i]==0 & b[i]==1){
+      s=s+1
+    }
+    else if (a[i]==0 & b[i]==0){
+      t=t+1
+    }
+  }
+  if(asym == 0){
+    # Dissimilarity for asymmetric binary 
+    return((r+s)/(q+r+s+t))
+  }
+  else if (asym==1){
+    # Dissimilarity for symmetric binary
+    return((r+s)/(q+r+s))
+  }
+  else if (asym==2){
+    # Jaccard similarity for asymmetric binary
+    return((q)/(q+r+s))
+  }
+}
+
+# Printing out Dissimilarity matrix considering symmetric binary attributes
+binary.diss.mat <- matrix(nrow = 3, ncol = 3)
+for(i in c(1:3)){
+    for(j in c(1:3)){
+        binary.diss.mat[i,j] <- binary.diss(binary.df[i,], binary.df[j,], 0)
+    }
+}
+rownames(binary.diss.mat)<-names
+colnames(binary.diss.mat)<-names
+print(binary.diss.mat)
+```
+```{r}
+# Printing out Dissimilarity matrix considering asymmetric binary attributes
+binary.asym.diss.mat <- matrix(nrow = 3, ncol = 3)
+for(i in c(1:3)){
+    for(j in c(1:3)){
+        binary.asym.diss.mat[i,j] <- binary.diss(binary.df[i,], binary.df[j,], 1)
+    }
+}
+rownames(binary.asym.diss.mat)<-names
+colnames(binary.asym.diss.mat)<-names
+print(binary.asym.diss.mat)
+```
+```{r}
+# Illustrating inbuilt function for dissimilarity of Asymmetric binary attributes
+x <- c(0, 0, 1, 1, 1, 1)
+y <- c(1, 0, 1, 1, 0, 1)
+dist(rbind(x, y), method = "binary")
+```
+
+```{r}
+# Printing out Jaccard Similarity matrix for asymmetric binary attributes
+binary.jacc.mat <- matrix(nrow = 3, ncol = 3)
+for(i in c(1:3)){
+    for(j in c(1:3)){
+        binary.jacc.mat[i,j] <- binary.diss(binary.df[i,], binary.df[j,], 2)
+    }
+}
+rownames(binary.jacc.mat)<-names
+colnames(binary.jacc.mat)<-names
+print(binary.jacc.mat)
+```
+<br><br><br><br><br><br><br>
+
+### **2.3 Jaccard Similarity Index** 
+```{r}
+# The Jaccard similarity index measures the similarity between two sets of data. It can range from 0 to 1. The higher the number, the more similar the two sets of data.
+
+# The Jaccard similarity index is calculated as:
+
+# Jaccard Similarity = (number of observations in both sets) / (number in either set)
+
+a <- c(0, 1, 2, 5, 6, 8, 9)
+b <- c(0, 2, 3, 4, 5, 7, 9)
+
+#define Jaccard Similarity function
+jaccard <- function(a, b) {
+    intersection = length(intersect(a, b))
+    union = length(a) + length(b) - intersection
+    return (intersection/union)
+}
+
+#find Jaccard Similarity between the two sets 
+jaccard(a, b)
+
+#find Jaccard distance between sets a and b
+1 - jaccard(a, b)
+
+```
+
+
+```{r}
+g <- c('cat', 'dog', 'hippo', 'monkey')
+h <- c('monkey', 'rhino', 'ostrich', 'salmon')
+#find Jaccard Similarity between the two sets
+jaccard(g, h)
+#find Jaccard distance between sets g and h
+1 - jaccard(g, h)
+```
+
+<br><br><br><br><br>
+
+### **2.4 Distances**
+
+```{r}
+# Considering the following matrix for illustrating all distances
+a <- c(0, 1, 2, 5, 6, 8, 9)
+b <- c(0, 2, 3, 4, 5, 7, 9)
+c <- c(2, 4, 6 ,7, 8, 7, 0)
+
+num.df <- rbind(a, b, c)
+num.df
+
+```
+
+#### **2.4.1 Euclidian Distance**
+```{r}
+# User defined function to find euclidian distance between two data points
+dist.euclidian <- function (x,y) {
+  return(sqrt(sum((abs(x-y))**2)))
+}
+
+# Printing the euclidian distances in the form of distance matrix
+euclidian.mat <- matrix(nrow = 3, ncol = 3)
+for(i in c(1:3)){
+    for(j in c(1:3)){
+        euclidian.mat[i,j] <- dist.euclidian(num.df[i,], num.df[j,])
+    }
+}
+rownames(euclidian.mat)<-c("a", "b", "c")
+colnames(euclidian.mat)<-c("a", "b", "c")
+print(euclidian.mat)
+```
+
+```{r}
+# Inbuilt function to find the euclidian distance matrix between all data points
+dist(rbind(a, b, c), method = "euclidian")
+```
+<br><br><br><br>
+
+#### **2.4.2 Manhattan Distance**
+```{r}
+# User defined function to find manhattan distance between two data points
+dist.manhattan <- function (x,y) {
+  return (sum(abs(x-y)))
+}
+
+# Printing the manhattan distances in the form of distance matrix
+manhattan.mat <- matrix(nrow = 3, ncol = 3)
+for(i in c(1:3)){
+    for(j in c(1:3)){
+        manhattan.mat[i,j] <- dist.manhattan(num.df[i,], num.df[j,])
+    }
+}
+rownames(manhattan.mat)<-c("a", "b", "c")
+colnames(manhattan.mat)<-c("a", "b", "c")
+print(manhattan.mat)
+```
+
+```{r}
+# Inbuilt function to find the manhattan distance matrix between all data points
+dist(rbind(a, b, c), method = "manhattan")
+```
+
+#### **2.4.3 Chebyshev Distance**
+```{r}
+# User defined function to find Supremum / Chebyshev Distance between two data points
+dist.chebyshev <- function (x,y) {
+  return (max(abs(x-y)))
+}
+
+# Printing the Chebyshev distances in the form of distance matrix
+chebyshev.mat <- matrix(nrow = 3, ncol = 3)
+for(i in c(1:3)){
+    for(j in c(1:3)){
+        chebyshev.mat[i,j] <- dist.chebyshev(num.df[i,], num.df[j,])
+    }
+}
+rownames(chebyshev.mat)<-c("a", "b", "c")
+colnames(chebyshev.mat)<-c("a", "b", "c")
+print(chebyshev.mat)
+```
+
+```{r}
+# Inbuilt function to find the chebyshev/supremum distance matrix between all data points
+dist(rbind(a, b, c), method = "maximum")
+```
+
+#### **2.4.4 Minkowski Distance**
+```{r}
+# # User defined function to find Minkowski Distance between two data points
+dist.minkowski <- function (x,y,p) {
+  return (sum((abs(x-y))**p)**(1/p))
+}
+
+# Printing the minkowski distances in the form of distance matrix
+minkowski.mat <- matrix(nrow = 3, ncol = 3)
+for(i in c(1:3)){
+    for(j in c(1:3)){
+        minkowski.mat[i,j] <- dist.minkowski(num.df[i,], num.df[j,], 3)
+    }
+}
+rownames(minkowski.mat)<-c("a", "b", "c")
+colnames(minkowski.mat)<-c("a", "b", "c")
+print(minkowski.mat)
+```
+
+```{r}
+# Inbuilt function to find the minkowski distance matrix between all data points
+dist(rbind(a, b, c), method = "minkowski", p=3)
+```
+<br><br><br><br><br><br>
+
+### **2.5 Cosine Similarity** 
+```{r}
+# Inbuilt function to find cosine similarity between columns of a dataset
+# Calculates the cosine measure between two vectors or between all column vectors of a matrix.
+# install.packages("lsa")
+library(lsa)
+# Making Dataset column vise
+vec1<-c(23,87,98,45)
+vec2<-c(87,59,23,71)
+vec3<-c(50,92,47,19)
+new.df<-cbind(vec1, vec2, vec3)
+# Calculating cosine similarity matrix
+cosine(new.df)
+
+```
+### **End of the notebook** 

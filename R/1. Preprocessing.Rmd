@@ -1,0 +1,296 @@
+---
+title: <center>![Logo](D:\NITJ\Study\SEM 6\CSPC-322 Data Analytics Laboratory\FRONT.jpg)</center>
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+# *LAB ASSIGNMENT 1*
+## **Dataset details**
+In this R notebook, we are going to implement all the operations specified in the question statement on the "airquality" dataset available under "datasets" package in R. airquality dataset represents New York Air Quality Measurements. 
+<br />
+<br />
+This data set has daily air quality measurements in New York from May to September 1973 over a period of 5 months.
+
+![](D:\NITJ\Study\SEM 6\CSPC-322 Data Analytics Laboratory\dataset details.JPG)
+
+
+## **Install package and Library Import**
+
+```{r}
+#install the package "datasets" if not installed previously
+#install.packages("datasets")
+
+#import library of datasets
+library(datasets)
+```
+
+## **Dataset import**
+```{r}
+# Storing datset in some temporary variable
+dff<-airquality
+```
+
+
+## **Explore Dataset**
+```{r}
+# Checking the structure of dataset using str() function
+str(dff)
+```
+
+```{r}
+#Checking the head of the dataset using head()
+head(dff)
+
+```
+```{r}
+# Scatterplot of the dataset combined
+plot(dff)
+```
+
+```{r}
+# Summary of dataset having minimum, maximum, first quartile, third quartile, mean and # median of all the attributes
+summary(dff)
+```
+
+
+```{r}
+library(dplyr)
+#Finding column wise standard deviation
+dff %>% summarise_if(is.numeric, sd)
+```
+
+## **Checking missing Values**
+```{r}
+# Checking total number of NA (missing) values in the dataset
+sum(is.na(dff))
+```
+
+
+```{r}
+# Applying anyNA() on all columns of the dataset
+NAs<- mapply(anyNA,dff) 
+NAs
+```
+
+## **Handling missing Values**
+```{r}
+# Replace NA with monthly mean in Ozone and Solar.R
+for (i in 1:nrow(dff)){
+  
+  if(is.na(dff[i,"Ozone"])){
+    dff[i,"Ozone"]<- mean(dff[which(dff[,"Month"]==dff[i,"Month"]),"Ozone"],na.rm = TRUE)
+  }
+
+    if(is.na(dff[i,"Solar.R"])){
+      dff[i,"Solar.R"]<- mean(dff[which(dff[,"Month"]==airquality[i,"Month"]),"Solar.R"],na.rm = TRUE)
+  }
+}
+```
+
+```{r}
+#Checking the total of missing values in the dataset once again
+sum(is.na(dff))
+
+NAs.now<- mapply(anyNA,dff) 
+NAs.now
+```
+
+## **Checking presence of outliers**
+```{r}
+#Box plot for the dataset
+boxplot(dff)
+```
+<br />
+An outlier is a data point that differs significantly from other observations. An outlier may be due to variability in the measurement or it may indicate experimental error; the latter are sometimes excluded from the data set. It can be seen that the attributes Ozone and Wind have outliers. Outliers are the data points above and below the upper fence and lower fence of the box plot respectively.
+
+
+## **Removing outliers**
+Removing outliers or handling outliers is necessary as they can cause serious problems in stastical analyses.
+```{r}
+#Box plot for Ozone
+boxplot(dff$Ozone)
+```
+
+
+```{r}
+#Summary of Ozone 
+summary(dff$Ozone)
+```
+
+
+```{r}
+#Inter quartile range = 3rd quartile value - 1st quartile value
+IQR.Ozone=59.12-21.00
+
+# Value of upper fence = Third Quartile Value + 1.5 * Inter-quartile range 
+UpFence.Ozone=59.12+1.5*IQR.Ozone
+
+# Printing values of IQR and Upper fence
+IQR.Ozone
+UpFence.Ozone
+```
+
+```{r}
+# Box plot for Wind
+boxplot(dff$Wind)
+```
+
+
+```{r}
+#Summary of Wind
+summary(dff$Wind)
+```
+
+```{r}
+
+#Inter quartile range = 3rd quartile value - 1st quartile value
+IQR.Wind=11.500-7.400
+
+# Value of upper fence = Third Quartile Value + 1.5 * Inter-quartile range 
+UpFence.Wind=11.500+1.5*IQR.Wind
+
+# Printing values of IQR and Upper fence
+IQR.Wind
+UpFence.Wind
+```
+
+
+There is no need of considering the lower fence here as no attribute has the value lesser than their respective lower fences.
+<br />
+Value of lower fence = First Quartile value - 1.5 * inter-Quartile Range
+```{r}
+# Subsetting the dataset dff such that the value of Ozone and Wind are lower than the upper fence and putting it in a new variable "dff.clean" 
+dff.clean=subset(dff, Ozone<116.3 & Wind<17.65)
+boxplot(dff.clean)
+```
+No data points above the upper fence or below the lower fence of box plots found in dff.clean. Hence the outliers got removed.
+
+```{r}
+# Getting structure of clean dataset
+str(dff.clean)
+```
+
+
+```{r}
+# Finding the differences in number of observations in dataset before and after outlier removal.
+nrow(dff)
+nrow(dff.clean)
+nrow(dff) - nrow(dff.clean)
+```
+We can see that after outlier removal, 7 rows (observations/tuples) got removed from the dataset.
+
+
+```{r}
+# Summary of clean dataset having no missing values and no outliers. It shows minimum, maximum, first quartile, third quartile, mean and median of all the attributes
+summary(dff.clean)
+```
+
+
+
+```{r}
+# Standard Deviation
+dff.clean %>% summarise_if(is.numeric, sd)
+```
+Similarly, all other values can be calculated using above function and pipe operator.
+
+## **Corelation Coefficients**
+
+```{r}
+cor(dff.clean)
+```
+
+
+```{r}
+# This method gets corelation coefficients along with p-values.
+#install.packages("Hmisc")
+library(Hmisc)
+rcorr(as.matrix(dff.clean))
+```
+
+
+## **Scatter Plots Dependent v/s Independent variables and Regression Lines**
+
+
+```{r}
+# Plotting Ozone v/s Solar Radiation
+plot(dff.clean$Solar.R,dff.clean$Ozone, col="red",type="p", main="Mean Ozone Concentration v/s Solar Radiation", xlab="Solar Radiation", ylab = "Mean Ozone Concentration")
+```
+
+
+```{r}
+# Plotting Ozone v/s Wind
+plot(dff.clean$Wind, dff.clean$Ozone, col="blue", type="p", main="Mean Ozone Concentration v/s Wind", xlab="Wind", ylab = "Mean Ozone Concentration")
+```
+
+
+```{r}
+# Plotting Ozone v/s Temperature
+plot(dff.clean$Temp, dff.clean$Ozone, col="green",type="p", main="Mean Ozone Concentration v/s Temperature", xlab="Temperature", ylab = "Mean Ozone Concentration")
+```
+
+
+```{r}
+# Plotting Ozone v/s Month
+plot(dff.clean$Month, dff.clean$Ozone, col="blue",type="p", main="Mean Ozone Concentration v/s Month", xlab="Month", ylab = "Mean Ozone Concentration")
+```
+
+
+```{r}
+# Plotting Ozone v/s Day
+plot(dff.clean$Day, dff.clean$Ozone, col="purple",type="p", main="Mean Ozone Concentration v/s Day", xlab="Day", ylab = "Mean Ozone Concentration")
+```
+
+## Linear Regression
+```{r}
+model1<-lm(dff.clean$Ozone~dff.clean$Solar.R)
+plot(dff.clean$Ozone~dff.clean$Solar.R)
+abline(model1, col="blue", lwd=3)
+
+```
+
+
+```{r}
+summary(model1)
+```
+
+## Quadratic regression
+```{r}
+modelnew <- lm(dff.clean$Ozone ~ dff.clean$Wind + I(dff.clean$Wind^2))
+plot(dff.clean$Ozone~dff.clean$Wind)
+lines(smooth.spline(dff.clean$Wind, predict(modelnew)), col="blue", lwd=3)
+```
+
+```{r}
+summary(modelnew)
+```
+
+
+## Exponential Regression
+```{r}
+library(ggplot2)
+plot3<-ggplot(dff.clean, aes(x=Temp, y=Ozone)) + geom_point()+ stat_smooth(method = "lm", se=FALSE, formula = (y ~ exp(x)), size = 1)
+print(plot3 + labs(y="Mean Ozone Concentration(ppb)", x="Temperature(F)") + ggtitle("Mean ozone Concentration v/s Temperature"))
+```
+
+
+## Linear Regression
+```{r}
+model4<-lm(dff.clean$Ozone~dff.clean$Day)
+plot(dff.clean$Ozone~dff.clean$Day)
+abline(model4, col="blue", lwd=3)
+
+```
+
+
+## Linear Regression
+```{r}
+model5<-lm(dff.clean$Ozone~dff.clean$Month)
+plot(dff.clean$Ozone~dff.clean$Month)
+abline(model5, col="blue", lwd=3)
+
+```
+
+## **End of R notebook**
+## **RAJAN KATARIA**

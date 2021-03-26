@@ -1,0 +1,745 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Decision Tree implementation using R},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+
+\title{Decision Tree implementation using R}
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+\maketitle
+
+\hypertarget{rajan-kataria-18103076}{%
+\subsubsection{\texorpdfstring{\emph{Rajan Kataria
+(18103076)}}{Rajan Kataria (18103076)}}\label{rajan-kataria-18103076}}
+
+In this notebook, we are implementimg the decision tree algorithm using
+Information gain and Gini index as a splitting criterion. The dataset
+that has been used is a balance-scale dataset taken from
+\url{https://archive.ics.uci.edu/ml/machine-learning-databases/balance-scale/}
+. The dataset was manually converted from .data to .csv format after
+downloading from the mentioned link.
+
+\hypertarget{r-library-import}{%
+\subsection{\texorpdfstring{\textbf{R Library
+Import}}{R Library Import}}\label{r-library-import}}
+
+\textbf{Importing different libraries required for the implementation:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(ggplot2)}
+\KeywordTok{library}\NormalTok{(lattice)}
+\KeywordTok{library}\NormalTok{(lava)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'lava'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:ggplot2':
+## 
+##     vars
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(purrr)}
+\KeywordTok{library}\NormalTok{(caret)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Attaching package: 'caret'
+\end{verbatim}
+
+\begin{verbatim}
+## The following object is masked from 'package:purrr':
+## 
+##     lift
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(rpart)}
+\KeywordTok{library}\NormalTok{(rpart.plot)}
+\KeywordTok{library}\NormalTok{(ggthemes)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{dataset-import}{%
+\subsection{\texorpdfstring{\textbf{Dataset
+Import}}{Dataset Import}}\label{dataset-import}}
+
+\textbf{Importing the data-set in the .csv format using read.csv()
+function:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df<-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"C:/Users/Asus/Desktop/ML_18103076/balance_scale.csv"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{exploring-dataset}{%
+\subsection{\texorpdfstring{\textbf{Exploring
+dataset}}{Exploring dataset}}\label{exploring-dataset}}
+
+\textbf{Checking the structure of dataset using str() function:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{str}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    625 obs. of  5 variables:
+##  $ Left.Weight   : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ Left.Distance : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ Right.Weight  : int  1 1 1 1 1 2 2 2 2 2 ...
+##  $ Right.Distance: int  1 2 3 4 5 1 2 3 4 5 ...
+##  $ Class.Name    : Factor w/ 3 levels "B","L","R": 1 3 3 3 3 3 3 3 3 3 ...
+\end{verbatim}
+
+\textbf{Checking the head of the dataset using head().}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{head}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   Left.Weight Left.Distance Right.Weight Right.Distance Class.Name
+## 1           1             1            1              1          B
+## 2           1             1            1              2          R
+## 3           1             1            1              3          R
+## 4           1             1            1              4          R
+## 5           1             1            1              5          R
+## 6           1             1            2              1          R
+\end{verbatim}
+
+\textbf{Checking the unique values of all the columns using unique()
+function in order to see what values are taken by the variables:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{unique}\NormalTok{(df}\OperatorTok{$}\NormalTok{Left.Weight)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1 2 3 4 5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{unique}\NormalTok{(df}\OperatorTok{$}\StringTok{ }\NormalTok{Left.Distance)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1 2 3 4 5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{unique}\NormalTok{(df}\OperatorTok{$}\NormalTok{Right.Weight)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1 2 3 4 5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{unique}\NormalTok{(df}\OperatorTok{$}\NormalTok{Right.Distance)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 1 2 3 4 5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{unique}\NormalTok{(df}\OperatorTok{$}\NormalTok{Class.Name)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] B R L
+## Levels: B L R
+\end{verbatim}
+
+\textbf{Converting the factor value into integer bt taking the entire
+dataset into some temporary variable in order to check the correlation
+between the different variables or attributes using cor() function:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df.int<-df}
+\NormalTok{df.int}\OperatorTok{$}\NormalTok{Class.Name=}\StringTok{ }\KeywordTok{as.integer}\NormalTok{(df.int}\OperatorTok{$}\NormalTok{Class.Name)}
+\KeywordTok{cor}\NormalTok{(df.int)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                Left.Weight Left.Distance Right.Weight Right.Distance Class.Name
+## Left.Weight      1.0000000     0.0000000    0.0000000      0.0000000 -0.3068132
+## Left.Distance    0.0000000     1.0000000    0.0000000      0.0000000 -0.3068132
+## Right.Weight     0.0000000     0.0000000    1.0000000      0.0000000  0.3230563
+## Right.Distance   0.0000000     0.0000000    0.0000000      1.0000000  0.3230563
+## Class.Name      -0.3068132    -0.3068132    0.3230563      0.3230563  1.0000000
+\end{verbatim}
+
+\textbf{As all the variables i.e.~Left.Weight, Left.Distance,
+Right.Weight and Right.Distance are taking only the values 1, 2, 3, 4,
+5; we converted all of them into factor data type as now the whole
+dataset has become the nominal dataset and the Class.Name atribute was
+initially factor having 3 classes.}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df.copy<-df}
+\NormalTok{df.copy}\OperatorTok{$}\NormalTok{Left.Weight=}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(df.copy}\OperatorTok{$}\NormalTok{Left.Weight)}
+\NormalTok{df.copy}\OperatorTok{$}\NormalTok{Left.Distance=}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(df.copy}\OperatorTok{$}\NormalTok{Left.Distance)}
+\NormalTok{df.copy}\OperatorTok{$}\NormalTok{Right.Weight=}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(df.copy}\OperatorTok{$}\NormalTok{Right.Weight)}
+\NormalTok{df.copy}\OperatorTok{$}\NormalTok{Right.Distance=}\StringTok{ }\KeywordTok{as.factor}\NormalTok{(df.copy}\OperatorTok{$}\NormalTok{Right.Distance)}
+\KeywordTok{str}\NormalTok{(df.copy)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    625 obs. of  5 variables:
+##  $ Left.Weight   : Factor w/ 5 levels "1","2","3","4",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ Left.Distance : Factor w/ 5 levels "1","2","3","4",..: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ Right.Weight  : Factor w/ 5 levels "1","2","3","4",..: 1 1 1 1 1 2 2 2 2 2 ...
+##  $ Right.Distance: Factor w/ 5 levels "1","2","3","4",..: 1 2 3 4 5 1 2 3 4 5 ...
+##  $ Class.Name    : Factor w/ 3 levels "B","L","R": 1 3 3 3 3 3 3 3 3 3 ...
+\end{verbatim}
+
+\textbf{Checking the summary of dataet formed after conversion of
+attributes into factor type:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{summary}\NormalTok{(df.copy)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##  Left.Weight Left.Distance Right.Weight Right.Distance Class.Name
+##  1:125       1:125         1:125        1:125          B: 49     
+##  2:125       2:125         2:125        2:125          L:288     
+##  3:125       3:125         3:125        3:125          R:288     
+##  4:125       4:125         4:125        4:125                    
+##  5:125       5:125         5:125        5:125
+\end{verbatim}
+
+\hypertarget{visualizing-dataset}{%
+\subsection{\texorpdfstring{\textbf{Visualizing Dataset
+}}{Visualizing Dataset }}\label{visualizing-dataset}}
+
+\textbf{Plotting a bar plot and checking the count of each class
+division:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{pl<-}\KeywordTok{ggplot}\NormalTok{(df.copy, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{Class.Name))}
+\NormalTok{pl}\OperatorTok{+}\StringTok{ }\KeywordTok{geom_bar}\NormalTok{()}\OperatorTok{+}\KeywordTok{theme_calc}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Assign_18103076_files/figure-latex/unnamed-chunk-13-1.pdf}
+
+\textbf{Plotting the entire dataset:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{plot}\NormalTok{(df.copy)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Assign_18103076_files/figure-latex/unnamed-chunk-14-1.pdf}
+
+\hypertarget{pre-process-data-handling-missing-values}{%
+\subsection{\texorpdfstring{\textbf{Pre-process data (Handling missing
+values)}}{Pre-process data (Handling missing values)}}\label{pre-process-data-handling-missing-values}}
+
+\textbf{Checking the dataset for having any missing values:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{sum}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(df.copy))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{mean}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(df.copy))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#If missing values would have been found, we would have replaced them with the mean of the values in the respective cloumn}
+\CommentTok{#for(i in 1:ncol(df.copy))}
+\CommentTok{#\{df.copy[is.na(df.copy[,i]), i] <- mean(df.copy[,i], na.rm = TRUE)\}}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{slicing-the-dataset}{%
+\subsection{\texorpdfstring{\textbf{Slicing the
+dataset}}{Slicing the dataset}}\label{slicing-the-dataset}}
+
+\textbf{Slicing the data into training set and the test\_set}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{#pod is partitioning of data here}
+\NormalTok{pod=}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{2}\NormalTok{, }\KeywordTok{nrow}\NormalTok{(df.copy), }\DataTypeTok{replace=}\OtherTok{TRUE}\NormalTok{, }\KeywordTok{c}\NormalTok{(}\FloatTok{0.7}\NormalTok{, }\FloatTok{0.3}\NormalTok{))}
+\CommentTok{#putting the first index portion of pod in train_data}
+\NormalTok{train_data=df.copy[pod}\OperatorTok{==}\DecValTok{1}\NormalTok{,]}
+\CommentTok{#putting the second index portion of pod in test_data}
+\NormalTok{test_data=df.copy[pod}\OperatorTok{==}\DecValTok{2}\NormalTok{,]}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{Checking the dimensions of training dataset and testing dataset}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{dim}\NormalTok{(train_data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 434   5
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{dim}\NormalTok{(test_data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 191   5
+\end{verbatim}
+
+\hypertarget{training-the-dataset}{%
+\subsection{\texorpdfstring{\textbf{Training the
+dataset}}{Training the dataset}}\label{training-the-dataset}}
+
+\textbf{Training a decision tree classifier using Information gain
+criterion and 10 fold cross validation on the training dataset:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tree.ctrl <-}\StringTok{ }\KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"repeatedcv"}\NormalTok{, }\DataTypeTok{number =} \DecValTok{10}\NormalTok{, }\DataTypeTok{repeats =} \DecValTok{3}\NormalTok{)}
+\NormalTok{ig.dtree <-}\StringTok{ }\KeywordTok{train}\NormalTok{(Class.Name }\OperatorTok{~}\NormalTok{., }\DataTypeTok{data =}\NormalTok{ train_data, }\DataTypeTok{method =} \StringTok{"rpart"}\NormalTok{,}
+                   \DataTypeTok{parms =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{split =} \StringTok{"information"}\NormalTok{),}
+                   \DataTypeTok{trControl=}\NormalTok{tree.ctrl,}
+                   \DataTypeTok{tuneLength =} \DecValTok{10}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{Checking the results of trained decision tree classifier using
+Information gain criterion:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ig.dtree}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## CART 
+## 
+## 434 samples
+##   4 predictor
+##   3 classes: 'B', 'L', 'R' 
+## 
+## No pre-processing
+## Resampling: Cross-Validated (10 fold, repeated 3 times) 
+## Summary of sample sizes: 391, 391, 390, 390, 390, 391, ... 
+## Resampling results across tuning parameters:
+## 
+##   cp          Accuracy   Kappa     
+##   0.00000000  0.6605792  0.37523324
+##   0.02089269  0.6183328  0.29520383
+##   0.04178538  0.6145450  0.28808736
+##   0.06267806  0.5630768  0.19226735
+##   0.08357075  0.5408780  0.15075701
+##   0.10446344  0.5393277  0.14763735
+##   0.12535613  0.5416180  0.15206474
+##   0.14624881  0.5231719  0.11782561
+##   0.16714150  0.5171113  0.10671450
+##   0.18803419  0.4816420  0.03910978
+## 
+## Accuracy was used to select the optimal model using the largest value.
+## The final value used for the model was cp = 0.
+\end{verbatim}
+
+\textbf{Training a decision tree classifier using Gini index criterion
+and 10 fold cross validation on the training dataset:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{3333}\NormalTok{)}
+\NormalTok{gini.dtree <-}\StringTok{ }\KeywordTok{train}\NormalTok{(Class.Name}\OperatorTok{~}\NormalTok{., }\DataTypeTok{data =}\NormalTok{ train_data, }\DataTypeTok{method =} \StringTok{"rpart"}\NormalTok{,}
+                   \DataTypeTok{parms =} \KeywordTok{list}\NormalTok{(}\DataTypeTok{split =} \StringTok{"gini"}\NormalTok{),}
+                   \DataTypeTok{trControl=}\NormalTok{tree.ctrl,}
+                   \DataTypeTok{tuneLength =} \DecValTok{10}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\textbf{Checking the results of trained decision tree classifier using
+Gini index criterion:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{gini.dtree}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## CART 
+## 
+## 434 samples
+##   4 predictor
+##   3 classes: 'B', 'L', 'R' 
+## 
+## No pre-processing
+## Resampling: Cross-Validated (10 fold, repeated 3 times) 
+## Summary of sample sizes: 390, 392, 390, 391, 390, 391, ... 
+## Resampling results across tuning parameters:
+## 
+##   cp          Accuracy   Kappa     
+##   0.00000000  0.6328090  0.32163230
+##   0.02089269  0.6190493  0.29621626
+##   0.04178538  0.5982390  0.25739933
+##   0.06267806  0.5482567  0.16443334
+##   0.08357075  0.5312695  0.13323934
+##   0.10446344  0.5312695  0.13323934
+##   0.12535613  0.5212457  0.11366131
+##   0.14624881  0.5090716  0.09125793
+##   0.16714150  0.5075388  0.08841977
+##   0.18803419  0.4723758  0.02154035
+## 
+## Accuracy was used to select the optimal model using the largest value.
+## The final value used for the model was cp = 0.
+\end{verbatim}
+
+\hypertarget{plotting-the-decision-trees}{%
+\subsection{\texorpdfstring{\textbf{Plotting the decision
+trees}}{Plotting the decision trees}}\label{plotting-the-decision-trees}}
+
+\textbf{Plotting a decision tree formed by Information gain criterion:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{prp}\NormalTok{(ig.dtree}\OperatorTok{$}\NormalTok{finalModel, }\DataTypeTok{box.palette =} \StringTok{"Reds"}\NormalTok{, }\DataTypeTok{tweak =} \FloatTok{1.0}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Assign_18103076_files/figure-latex/unnamed-chunk-22-1.pdf}
+
+\textbf{Plotting a decision tree formed by Gini index criterion}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{prp}\NormalTok{(gini.dtree}\OperatorTok{$}\NormalTok{finalModel, }\DataTypeTok{box.palette =} \StringTok{"Reds"}\NormalTok{, }\DataTypeTok{tweak =} \FloatTok{1.0}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{Assign_18103076_files/figure-latex/unnamed-chunk-23-1.pdf}
+
+\hypertarget{prediction}{%
+\subsection{\texorpdfstring{\textbf{Prediction}}{Prediction}}\label{prediction}}
+
+\textbf{Prediction of decision tree formed by Information gain criterion
+on the test dataset:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ig.dtree.predict<-}\StringTok{ }\KeywordTok{predict}\NormalTok{(ig.dtree, test_data)}
+\NormalTok{ig.dtree.predict}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   [1] R R R R R R R R R R R R L L L R L L R L L L L L L L L L L L R R L R L L L
+##  [38] L R R R R R R R L R R R R L R R R R R R L R L L L L R L R L L R R R L L L
+##  [75] L L L L L R R R R R R R R R R R L R R R R R R L L R L R L L R L R L L L L
+## [112] R R L L R L L R L R R R R R L L R R R R R R R L R L R L R R R L L L R R R
+## [149] L L L L L L R L L L R L L L L R R R L L R R R R L L R R L L L L L L L L L
+## [186] L L L L L L
+## Levels: B L R
+\end{verbatim}
+
+\textbf{Predicted values converted into matrix:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{con_mat<-}\KeywordTok{table}\NormalTok{(ig.dtree.predict, test_data}\OperatorTok{$}\NormalTok{Class.Name)}
+\NormalTok{con_mat}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                 
+## ig.dtree.predict  B  L  R
+##                B  0  0  0
+##                L  5 68 22
+##                R  8 22 66
+\end{verbatim}
+
+\textbf{Confusion matrix and statistics of the decision tree formed
+using information gain criterion:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{confusionMatrix}\NormalTok{(ig.dtree.predict, test_data}\OperatorTok{$}\NormalTok{Class.Name )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction  B  L  R
+##          B  0  0  0
+##          L  5 68 22
+##          R  8 22 66
+## 
+## Overall Statistics
+##                                           
+##                Accuracy : 0.7016          
+##                  95% CI : (0.6313, 0.7655)
+##     No Information Rate : 0.4712          
+##     P-Value [Acc > NIR] : 9.963e-11       
+##                                           
+##                   Kappa : 0.4412          
+##                                           
+##  Mcnemar's Test P-Value : 0.004637        
+## 
+## Statistics by Class:
+## 
+##                      Class: B Class: L Class: R
+## Sensitivity           0.00000   0.7556   0.7500
+## Specificity           1.00000   0.7327   0.7087
+## Pos Pred Value            NaN   0.7158   0.6875
+## Neg Pred Value        0.93194   0.7708   0.7684
+## Prevalence            0.06806   0.4712   0.4607
+## Detection Rate        0.00000   0.3560   0.3455
+## Detection Prevalence  0.00000   0.4974   0.5026
+## Balanced Accuracy     0.50000   0.7441   0.7294
+\end{verbatim}
+
+\textbf{Prediction of decision tree formed by Gini index criterion on
+the test dataset:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{gini.dtree.predict<-}\StringTok{ }\KeywordTok{predict}\NormalTok{(gini.dtree, test_data)}
+\NormalTok{gini.dtree.predict}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##   [1] R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R R
+##  [38] R R R R L R R R R R L R R L R L R R L R L L L R R R R L R L R R L R L L L
+##  [75] L L L L L L R R L L L R R L L R L L L R R L L L L R L R L L R L R L R R R
+## [112] R R L R R L R R L L R L L L L L R L L L L L R L L L L L R R R L L L R R R
+## [149] L L L L L L R L L R R R R R R R R R L L L L R R L L L R L L L L L L L L L
+## [186] L L L L L L
+## Levels: B L R
+\end{verbatim}
+
+\textbf{Predicted values converted into matrix:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{con_mat2<-}\KeywordTok{table}\NormalTok{(gini.dtree.predict, test_data}\OperatorTok{$}\NormalTok{Class.Name)}
+\NormalTok{con_mat2}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                   
+## gini.dtree.predict  B  L  R
+##                  B  0  0  0
+##                  L  8 61 20
+##                  R  5 29 68
+\end{verbatim}
+
+\textbf{Confusion matrix and statistics of the decision tree formed
+using Gini criterion:}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{confusionMatrix}\NormalTok{(gini.dtree.predict, test_data}\OperatorTok{$}\NormalTok{Class.Name )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction  B  L  R
+##          B  0  0  0
+##          L  8 61 20
+##          R  5 29 68
+## 
+## Overall Statistics
+##                                          
+##                Accuracy : 0.6754         
+##                  95% CI : (0.604, 0.7412)
+##     No Information Rate : 0.4712         
+##     P-Value [Acc > NIR] : 9.89e-09       
+##                                          
+##                   Kappa : 0.3926         
+##                                          
+##  Mcnemar's Test P-Value : 0.002138       
+## 
+## Statistics by Class:
+## 
+##                      Class: B Class: L Class: R
+## Sensitivity           0.00000   0.6778   0.7727
+## Specificity           1.00000   0.7228   0.6699
+## Pos Pred Value            NaN   0.6854   0.6667
+## Neg Pred Value        0.93194   0.7157   0.7753
+## Prevalence            0.06806   0.4712   0.4607
+## Detection Rate        0.00000   0.3194   0.3560
+## Detection Prevalence  0.00000   0.4660   0.5340
+## Balanced Accuracy     0.50000   0.7003   0.7213
+\end{verbatim}
+
+\hypertarget{comparing-accuracy-of-both-the-decision-trees}{%
+\subsection{\texorpdfstring{\textbf{Comparing accuracy of both the
+decision
+trees}}{Comparing accuracy of both the decision trees}}\label{comparing-accuracy-of-both-the-decision-trees}}
+
+We have come to know about the accuracy of both the decision tree
+classification algorithms from the above Confusion matrices and
+Statistics field. The accuracy of Infomation gain classifier is: 64.41\%
+The accuracy of Gini index classifier is: 63.28\% Hence, we have seen
+the implementation of decision tree using both the splitting criterions.
+
+\hypertarget{end-of-the-noteboook}{%
+\subsection{\texorpdfstring{\textbf{End of the
+Noteboook}}{End of the Noteboook}}\label{end-of-the-noteboook}}
+
+\end{document}

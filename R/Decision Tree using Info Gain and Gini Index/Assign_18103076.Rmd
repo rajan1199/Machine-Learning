@@ -1,0 +1,237 @@
+---
+title: "Decision Tree implementation using R"
+output:
+  html_notebook: default
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+### *Rajan Kataria (18103076)*
+<br />
+In this notebook, we are implementimg the decision tree algorithm using Information gain and Gini index as a splitting criterion. The dataset that has been used is a balance-scale dataset taken from https://archive.ics.uci.edu/ml/machine-learning-databases/balance-scale/ . The dataset was manually converted from .data to .csv format after downloading from the mentioned link.
+
+
+## **R Library Import**
+**Importing different libraries required for the implementation:**
+```{r}
+
+library(ggplot2)
+library(lattice)
+library(lava)
+library(purrr)
+library(caret)
+library(rpart)
+library(rpart.plot)
+library(ggthemes)
+```
+
+
+## **Dataset Import**
+
+**Importing the data-set in the .csv format using read.csv() function:**
+```{r}
+df<- read.csv("C:/Users/Asus/Desktop/ML_18103076/balance_scale.csv")
+```
+
+
+## **Exploring dataset**
+**Checking the structure of dataset using str() function:**
+```{r}
+str(df)
+```
+
+<br /><br />
+**Checking the head of the dataset using head().**
+```{r}
+head(df)
+```
+
+<br /><br />
+**Checking the unique values of all the columns using unique() function  in order to see what values are taken by the variables:**
+```{r}
+unique(df$Left.Weight)
+unique(df$ Left.Distance)
+unique(df$Right.Weight)
+unique(df$Right.Distance)
+unique(df$Class.Name)
+```
+```{r}
+unique(df$ Left.Distance)
+```
+```{r}
+unique(df$Right.Weight)
+```
+```{r}
+unique(df$Right.Distance)
+```
+```{r}
+unique(df$Class.Name)
+```
+
+<br /><br />
+**Converting the factor value into integer bt taking the entire dataset into some temporary variable in order to check the correlation between the different variables or attributes using cor() function:**
+```{r}
+df.int<-df
+df.int$Class.Name= as.integer(df.int$Class.Name)
+cor(df.int)
+```
+
+<br /><br />
+**As all the variables i.e. Left.Weight, Left.Distance, Right.Weight and Right.Distance are taking only the values 1, 2, 3, 4, 5; we converted all of them into factor data type as now the whole dataset has become the nominal dataset and the Class.Name atribute was initially factor having 3 classes.**
+```{r}
+df.copy<-df
+df.copy$Left.Weight= as.factor(df.copy$Left.Weight)
+df.copy$Left.Distance= as.factor(df.copy$Left.Distance)
+df.copy$Right.Weight= as.factor(df.copy$Right.Weight)
+df.copy$Right.Distance= as.factor(df.copy$Right.Distance)
+str(df.copy)
+```
+
+<br /><br />
+**Checking the summary of dataet formed after conversion of attributes into factor type:**
+```{r}
+summary(df.copy)
+```
+
+## **Visualizing Dataset **
+**Plotting a bar plot and checking the count of each class division:**
+```{r}
+pl<-ggplot(df.copy, aes(x=Class.Name))
+pl+ geom_bar()+theme_calc()
+```
+
+<br /><br />
+**Plotting the entire dataset:**
+```{r}
+plot(df.copy)
+```
+
+
+## **Pre-process data (Handling missing values)**
+
+**Checking the dataset for having any missing values:**
+```{r}
+sum(is.na(df.copy))
+mean(is.na(df.copy))
+
+#If missing values would have been found, we would have replaced them with the mean of the values in the respective cloumn
+#for(i in 1:ncol(df.copy))
+#{df.copy[is.na(df.copy[,i]), i] <- mean(df.copy[,i], na.rm = TRUE)}
+```
+
+## **Slicing the dataset**
+
+**Slicing the data into training set and the test_set**
+```{r}
+#pod is partitioning of data here
+pod= sample(2, nrow(df.copy), replace=TRUE, c(0.7, 0.3))
+#putting the first index portion of pod in train_data
+train_data=df.copy[pod==1,]
+#putting the second index portion of pod in test_data
+test_data=df.copy[pod==2,]
+```
+  
+<br /><br />
+**Checking the dimensions of training dataset and testing dataset**
+```{r}
+dim(train_data)
+dim(test_data)
+```
+  
+## **Training the dataset**
+
+**Training a decision tree classifier using Information gain criterion and 10 fold cross validation on the training dataset:**
+```{r}
+tree.ctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+ig.dtree <- train(Class.Name ~., data = train_data, method = "rpart",
+                   parms = list(split = "information"),
+                   trControl=tree.ctrl,
+                   tuneLength = 10)
+```
+  
+<br /><br />
+**Checking the results of trained decision tree classifier using Information gain criterion:**
+```{r}
+ig.dtree
+```
+  <br /><br />
+**Training a decision tree classifier using Gini index criterion and 10 fold cross validation on the training dataset:**
+```{r}
+
+
+set.seed(3333)
+gini.dtree <- train(Class.Name~., data = train_data, method = "rpart",
+                   parms = list(split = "gini"),
+                   trControl=tree.ctrl,
+                   tuneLength = 10)
+```
+
+<br /><br />
+**Checking the results of trained decision tree classifier using Gini index criterion:**
+```{r}
+gini.dtree
+```
+
+## **Plotting the decision trees**
+
+**Plotting a decision tree formed by Information gain criterion:**
+```{r}
+prp(ig.dtree$finalModel, box.palette = "Reds", tweak = 1.0)
+```
+ 
+ <br /><br />
+**Plotting a decision tree formed by Gini index criterion**
+```{r}
+prp(gini.dtree$finalModel, box.palette = "Reds", tweak = 1.0)
+``` 
+
+## **Prediction**
+
+**Prediction of decision tree formed by Information gain criterion on the test dataset:**
+```{r}
+ig.dtree.predict<- predict(ig.dtree, test_data)
+ig.dtree.predict
+```
+ 
+<br /><br />
+**Predicted values converted into matrix:** 
+```{r}
+con_mat<-table(ig.dtree.predict, test_data$Class.Name)
+con_mat
+```
+
+<br /><br />
+**Confusion matrix and statistics of the decision tree formed using information gain criterion:**
+```{r}
+confusionMatrix(ig.dtree.predict, test_data$Class.Name )
+```
+  
+
+<br /><br />
+**Prediction of decision tree formed by Gini index criterion on the test dataset:**
+```{r}
+gini.dtree.predict<- predict(gini.dtree, test_data)
+gini.dtree.predict
+```
+
+<br /><br />
+**Predicted values converted into matrix:**
+```{r}
+con_mat2<-table(gini.dtree.predict, test_data$Class.Name)
+con_mat2
+```
+
+<br /><br />
+**Confusion matrix and statistics of the decision tree formed using Gini criterion:**
+```{r}
+confusionMatrix(gini.dtree.predict, test_data$Class.Name )
+```
+
+## **Comparing accuracy of both the decision trees**
+We have come to know about the accuracy of both the decision tree classification algorithms from the above Confusion matrices and Statistics field.<br />
+The accuracy of Infomation gain classifier is: 64.41% <br />
+The accuracy of Gini index classifier is: 63.28% <br />
+Hence, we have seen the implementation of decision tree using both the splitting criterions.
+
+## **End of the Noteboook**
+
